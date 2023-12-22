@@ -1,0 +1,17 @@
+program TestProgram
+var
+    a : int
+    b : int
+    c : int
+    d : int
+    e : int
+    f : int
+begin
+    b := 15
+    c := 14
+    if a> b + c then
+    c  = c + 1
+    else  c = c - 1
+    a := b>=c ? b==c?b:48+c : c
+    output := a
+end

@@ -1,0 +1,5 @@
+program TestProgram
+begin
+    while i>= 6 do
+    c := c + 1
+end

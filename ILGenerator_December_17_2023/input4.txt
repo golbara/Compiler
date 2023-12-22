@@ -1,0 +1,10 @@
+program TestProgram
+begin
+    if a> b then:
+    begin
+    c  := c - 1
+    end
+    else: begin
+    c := c +1
+    end
+end

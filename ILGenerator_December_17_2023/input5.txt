@@ -1,0 +1,7 @@
+program TestProgram
+begin
+    for i:=1 to 4 do
+    begin
+    c := c + 1
+    end
+end
