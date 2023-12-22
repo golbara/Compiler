@@ -1,0 +1,37 @@
+['a', 'b', 'c', '>=', 'b', 'c', '==', 'b', '48', 'c', '+', '"?:"', 'c', '"?:"', '":="', 'output', 'a', '":="', 'block']
+ldloc b
+ldloc c
+cgt
+stloc T0
+ldloc b
+ldloc c
+ceq
+stloc T1
+ldc.i8 48
+ldloc c
+add
+stloc T2
+ldloc T1
+brtrue Label1
+br Label2
+Label1:
+ldloc b
+br Label3
+Label2:
+ldloc T2
+Label3:
+stloc T1
+ldloc T0
+brtrue Label4
+br Label5
+Label4:
+ldloc T1
+br Label6
+Label5:
+ldloc c
+Label6:
+stloc T0
+ldloc T0
+stloc a
+ldloc a
+stloc output

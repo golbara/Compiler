@@ -1,0 +1,5 @@
+program TestProgram
+begin
+    a := b>=c ? b==c?b:48+c : c
+    output := a
+end

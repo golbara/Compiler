@@ -20,6 +20,8 @@ class ILMapper:
                 'if', 'for', 'while',
                 '\"?:\"',
                 'block',
+                 # '\"then:\"',
+                 # '\"else:\"',
                  ]
 
 
@@ -47,13 +49,20 @@ class ILMapper:
             self.global_variables.append(item)
 
     def generate_intermediate_language(self, post_order_array, pre_order_array=None):
-        for item in post_order_array:
+        length = len(post_order_array)
+        for i in range(length):
+            item = post_order_array[i]
             if self.is_operator(item):
                 self.il_codes.append(self.generate_il_based_on_operator(item))
-            else:
+            elif item=="\"then:\"":
+                condition_result = self.stack.pop()
+                i = self.ifst(post_order_array,i,condition_result)
+            elif(self.is_identifier(item) or item.isnumeric()):
                 if self.is_identifier(item):
                     self.add_global_variable(item)
                 self.stack.append(item)
+            # print("***************************8")
+            # print(self.stack)
 
         result = ''
         for string in self.il_codes:
@@ -66,6 +75,23 @@ class ILMapper:
             my_file.write(self.get_msil_footer())
         return result
 
+    def my_IL_generator(self,post_order_array,index):
+        while (post_order_array[index] != "block"):
+            print("^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+            print(self.stack)
+            item = post_order_array[index]
+            if self.is_operator(item):
+                self.il_codes.append(self.generate_il_based_on_operator(item))
+            elif item == "\"then:\"":
+                condition_result = self.stack.pop()
+                self.ifst(post_order_array, index, condition_result)
+            elif (self.is_identifier(item) or item.isnumeric()):
+                if self.is_identifier(item):
+                    self.add_global_variable(item)
+                self.stack.append(item)
+            index += 1
+        index +=1 # jump the "block" element in the array
+        return  index
     def is_temp_reg(self, code):
         return str.startswith(code, "T")
 
@@ -76,7 +102,7 @@ class ILMapper:
             return False
 
     def is_identifier(self, item):
-        if not self.is_operator(item) and item[0].isalpha():
+        if not self.is_operator(item) and (item[0].isalpha() and item.isalnum()):
             return True
         else:
             return False
@@ -99,8 +125,9 @@ class ILMapper:
             first_operand = self.stack.pop()
             condition = self.stack.pop()
             return self.ternary(condition,first_operand,second_operand)
-        if item == 'if':
-            pass
+        # if item == '\"then:\"':
+        #     if_condition_result = self.stack.pop()
+        #     return  self.ifst(if_condition_result)
 
 
 
@@ -233,5 +260,22 @@ class ILMapper:
 
         return condition_load_statement+f"brtrue {true_start_label}\n"+f"br {false_start_label}\n"+f"{true_start_label+':'}\n"+first_load_statement +f"br {false_end_label} \n" +f"{false_start_label+':'}\n"+second_load_statement+f"{false_end_label+':'}\n"+ f"stloc {result_reg}\n"
 
-
+    def ifst(self, post_order_array,index, condition_result):
+        # load condition result
+        self.il_codes.append(f"ldloc {condition_result}\n")
+        # branch to then lable
+        then_label = self.create_new_label()
+        self.il_codes.append(f"brtrue {then_label}\n")
+        # branch to else lable
+        else_label = self.create_new_label()
+        self.il_codes.append(f"br {else_label}\n")
+        # start instructions related to 'then'
+        self.il_codes.append(f"{then_label+':'}\n")
+        index += 1  # index of the first instruction after "then:" lable
+        index = self.my_IL_generator(post_order_array,index)
+        if (post_order_array[index] == '\"else:\"'):
+            # insert else lable into il_codes list
+            self.il_codes.append(f"{else_label+':'}\n")
+            index = self.my_IL_generator(post_order_array,index)
+        return index
 
