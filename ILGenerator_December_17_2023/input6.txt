@@ -1,5 +1,7 @@
 program TestProgram
 begin
     while i>= 6 do
+    begin
     c := c + 1
+    end
 end

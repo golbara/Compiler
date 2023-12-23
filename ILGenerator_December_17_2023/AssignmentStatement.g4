@@ -47,7 +47,7 @@ ifst
 //    'else' NEWLINE* compoundst;
 whilest
 	returns[value_attr = str(), type_attr = str()]:
-	'while' cond 'do' NEWLINE* statement;
+	'while' cond 'do' NEWLINE* compoundst;
 
 switchst
 	returns[value_attr = str(), type_attr = str()]:

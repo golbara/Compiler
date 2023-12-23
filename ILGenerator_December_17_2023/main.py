@@ -68,6 +68,6 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         '-n', '--file',
-        help='Input source', default=r'input4.txt')
+        help='Input source', default=r'input5.txt')
     args = argparser.parse_args()
     main(args)

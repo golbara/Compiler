@@ -4,4 +4,5 @@ begin
     begin
     c := c + 1
     end
+    ouput := 2
 end
