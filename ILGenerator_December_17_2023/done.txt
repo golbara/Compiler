@@ -1,0 +1,10 @@
+# use full link
+# https://en.wikipedia.org/wiki/List_of_CIL_instructions
+
+
+//
+Relational operations
+the ability to update "i" in forLoop.(this was not requested)
+
+// done
+# it is assumed that we have normal initialization in for loop

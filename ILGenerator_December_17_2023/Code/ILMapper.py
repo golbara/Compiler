@@ -17,7 +17,7 @@ class ILMapper:
                 '&&', '||',
                 '!', '&', '|', '^',
                 '>>', '<<',
-                'if', 'for', 'while',
+                'if',
                 '\"?:\"',
                 'block',
                  # '\"then:\"',
@@ -50,17 +50,24 @@ class ILMapper:
 
     def generate_intermediate_language(self, post_order_array, pre_order_array=None):
         length = len(post_order_array)
-        for i in range(length):
+        i = 0
+        while(i<length):
             item = post_order_array[i]
             if self.is_operator(item):
                 self.il_codes.append(self.generate_il_based_on_operator(item))
-            elif item=="\"then:\"":
-                condition_result = self.stack.pop()
-                i = self.ifst(post_order_array,i,condition_result)
+            elif item == "for":
+                i = self.forst(post_order_array,i) - 1
+                print("done!")
+            elif item == "while":
+                i = self.whilest(post_order_array,i)
             elif(self.is_identifier(item) or item.isnumeric()):
                 if self.is_identifier(item):
                     self.add_global_variable(item)
                 self.stack.append(item)
+            elif item=="if":
+                condition_result = self.stack.pop()
+                i = self.ifst(post_order_array,i,condition_result) -1
+            i+=1
             # print("***************************8")
             # print(self.stack)
 
@@ -82,7 +89,7 @@ class ILMapper:
             item = post_order_array[index]
             if self.is_operator(item):
                 self.il_codes.append(self.generate_il_based_on_operator(item))
-            elif item == "\"then:\"":
+            elif item == "if":
                 condition_result = self.stack.pop()
                 self.ifst(post_order_array, index, condition_result)
             elif (self.is_identifier(item) or item.isnumeric()):
@@ -279,3 +286,70 @@ class ILMapper:
             index = self.my_IL_generator(post_order_array,index)
         return index
 
+    def forst(self,post_order_array,index):
+        # passing through the "for" lable
+        index += 1
+        # load  the start value
+        self.il_codes.append(f"ldc.i8 {post_order_array[index]}\n")
+        # store the start value in the ID
+        index += 1
+        id = post_order_array[index]
+        self.il_codes.append(f"stloc {id}\n")
+        # jump over the "to"
+        index+=2
+        # load the stop value
+        self.il_codes.append(f"ldc.i8 {post_order_array[index]}\n")
+        # store the stop value in a temp register
+        upper_bound_reg = self.create_temp_reg()
+        self.il_codes.append(f"stloc {upper_bound_reg}\n")
+        # set lable for the forLoop body
+        for_body_lable = self.create_new_label()
+        # visit the next element (enter to the body)
+        # print forLoop body lable
+        self.il_codes.append(f"{for_body_lable+':'}\n")
+        index +=1
+        index = self.my_IL_generator(post_order_array,index)
+        # add one to the counter (i = i +1)
+        first_load_statement = f"ldloc {id}\n"
+        second_load_statement = f"ldc.i8 1\n"
+        self.il_codes.append(first_load_statement + second_load_statement + f"ADD\n"+f"stloc {id}\n")
+        # check if we have meet the limit
+        ## load the upper_bound
+        self.il_codes.append(f"ldloc {upper_bound_reg}\n")
+        ## compare with id (which is increased by one)
+        self.il_codes.append(f"ldloc {id}\n"+"ceq\n")
+        # save the result of comparison between i and upper_bound in a temp reg
+        temp_reg = self.create_temp_reg()
+        self.il_codes.append(f"stloc {temp_reg}\n")
+        # branch to the forLoop lable if we have not still meet the upper_bound
+        exit_label = self.create_new_label()
+        self.il_codes.append(f"brtrue {exit_label}\n"+f"br {for_body_lable}\n"+f"{exit_label}:\n")
+        return  index
+
+    def whilest(self,post_order_array,index):
+        # jump from the while
+        index +=1
+        # generate il for condition
+        first = post_order_array[index]
+        index +=1
+        second = post_order_array[index]
+        index += 1
+        operator = post_order_array[index]
+        condition_il = self.relational(first,second,operator)
+        condition_result = self.stack[0]
+        # # check the complying of condition
+        # self.il_codes.append(f"ldloc {condition_result}\n")
+        self.il_codes.append(condition_il)
+        # set label for whilest
+        while_body_label = self.create_new_label()
+        # generate exit lable
+        exitWhile_label = self.create_new_label()
+        # branch or do not (while lable / exit lable)
+        self.il_codes.append(f"brtrue {exitWhile_label}\n"+f"br {while_body_label}\n")
+        self.il_codes.append(f"{while_body_label + ':'}\n")
+        # while instructions
+        index += 1 # jump the parent condition node
+        index = self.my_IL_generator(post_order_array,index)
+        self.il_codes.append(condition_il)
+        self.il_codes.append(f"{exitWhile_label}:\n")
+        return  index

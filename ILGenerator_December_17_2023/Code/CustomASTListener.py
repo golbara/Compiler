@@ -156,13 +156,27 @@ class ASTListener(AssignmentStatementListener):
         thenCompoundPntr.brother = elsePntr
         thenPntr = self.ast.make_node(value="\"then:\"", child=None, brother=thenCompoundPntr)
         condPntr = self.ast.make_node(value=ctx.cond().getText(), child=ctx.cond().value_attr, brother=thenPntr)
-        ifPntr = self.ast.make_node(value="if", child=condPntr, brother=None)
+        iflabelPntr = self.ast.make_node(value="if",child=None,brother=condPntr)
+        ifPntr = self.ast.make_node(value="ifst", child=iflabelPntr, brother=None)
         ctx.value_attr = ifPntr
         self.ast.root = ifPntr
     def exitForst(self, ctx: AssignmentStatementParser.ForstContext):
-        self.make_AST_subtree(tree_node=ctx, opertor="for")
+        compoundPntr =self.make_AST_subtree(tree_node=ctx.compoundst(),opertor="block")
+        endPntr = self.ast.make_node(value=ctx.getChild(5).getText(), child=None, brother=compoundPntr)
+        toPntr = self.ast.make_node(value="to",child= None,brother= endPntr)
+        startPntr = self.ast.make_node(value=ctx.getChild(3).getText(), child=None , brother = None )
+        idPntr = self.ast.make_node(value=ctx.getChild(1).getText(), child=startPntr,brother= toPntr)
+        fromPntr = self.ast.make_node(value="for", child=None,brother=idPntr)
+        forPntr =   self.ast.make_node(value="forst",child=fromPntr, brother=None)
+        ctx.value_attr = forPntr
+        self.ast.root = forPntr
     def exitWhilest(self, ctx: AssignmentStatementParser.WhilestContext):
-        self.make_AST_subtree(tree_node=ctx, opertor="while")
+        compoundPntr = self.make_AST_subtree(tree_node=ctx.compoundst(), opertor=ctx.compoundst().value_attr.value)
+        condPntr = self.ast.make_node(value=ctx.cond().getText(), child=ctx.cond().value_attr, brother=compoundPntr)
+        whilePntr = self.ast.make_node(value="while",child=None,brother=condPntr)
+        whilestPntr = self.ast.make_node(value="whilest",child=whilePntr,brother= None)
+        ctx.value_attr = whilestPntr
+        self.ast.root = whilestPntr
     def exitSwitchst(self, ctx: AssignmentStatementParser.SwitchstContext):
         self.make_AST_subtree(tree_node=ctx, opertor="switch")
 

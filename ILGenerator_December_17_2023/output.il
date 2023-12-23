@@ -10,47 +10,36 @@
 .locals init ([0] int64 T0)
 .locals init ([1] int64 T1)
 .locals init ([2] int64 T2)
-.locals init ([3] int64 T3)
-.locals init ([4] int64 T4)
-.locals init ([5] int64 a)
-.locals init ([6] int64 b)
-.locals init ([7] int64 c)
-.locals init ([8] int64 output)
+.locals init ([3] int64 c)
+.locals init ([4] int64 forst)
+.locals init ([5] int64 ouput)
+.locals init ([6] int64 output)
 nop
 ///////////////////////// IL CODE
-ldloc a
-ldloc b
-cgt
+ldc.i8 1
+stloc i
+ldc.i8 4
 stloc T0
-ldloc T0
-brtrue Label1
-br Label2
 Label1:
 ldloc c
 ldc.i8 1
-sub
+add
 stloc T1
 ldloc T1
 stloc c
+ldloc i
+ldc.i8 1
+ADD
+stloc i
+ldloc T0
+ldloc i
+ceq
+stloc T1
+brtrue Label2
+br Label1
 Label2:
-ldloc c
-ldc.i8 1
-add
-stloc T1
-ldloc T1
-stloc c
-ldloc c
-ldc.i8 1
-sub
-stloc T1
-ldloc T1
-stloc c
-ldloc c
-ldc.i8 1
-add
-stloc T1
-ldloc T1
-stloc c
+ldc.i8 2
+stloc ouput
 
 ///////////////////////// IL CODE
 ldloca.s   output
